@@ -1,0 +1,77 @@
+unit ConexaoSQLite_U;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Phys.SQLite, FireDAC.Phys.SQLiteDef,
+  FireDAC.Stan.ExprFuncs, FireDAC.Phys.SQLiteWrapper.Stat;
+
+type
+  TDataModuleConexao = class(TDataModule)
+    FDConnection: TFDConnection;
+    procedure DataModuleCreate(Sender: TObject);
+  public
+    class function GravarLogDownload(Url: String): Integer;
+    class procedure AtualizarDataTerminoDownload(Id: Integer);
+  end;
+
+  const
+    SQLInsert = 'INSERT INTO LOGDOWNLOAD (CODIGO, URL, DATAINICIO) VALUES (%d, %s, %s)';
+    SQLUpdate = 'UPDATE LOGDOWNLOAD SET DATAFIM=%s WHERE CODIGO=%d';
+
+
+var
+  DataModule: TDataModuleConexao;
+
+implementation
+
+{$R *.dfm}
+
+{ TDataModuleConexao }
+
+class procedure TDataModuleConexao.AtualizarDataTerminoDownload(Id: Integer);
+
+  function GetSQLFormatado: String;
+  begin
+    Result := Format(SQLUpdate, [QuotedStr(DateToStr(Now)),Id]);
+  end;
+
+begin
+  try
+    DataModule.FDConnection.ExecSQL(GetSQLFormatado);
+  except on E: Exception do
+    raise Exception.Create('Não foi possível Atualizar a DataFim!');
+  end;
+end;
+
+procedure TDataModuleConexao.DataModuleCreate(Sender: TObject);
+begin
+  Self.FDConnection.Params.Database := Concat(GetCurrentDir, '\..\..\..\BancoDeDados\logDownload.db');
+  Self.FDConnection.Connected       := True;
+end;
+
+class function TDataModuleConexao.GravarLogDownload(Url: String): Integer;
+var
+  CodigoLog: Integer;
+
+  function GetSQLFormatado: String;
+  begin
+    Result := Format(SQLInsert, [CodigoLog,
+                                 QuotedStr(Url),
+                                 QuotedStr(DateToStr(Now))]);
+  end;
+
+begin
+  CodigoLog := GetProximoCodigoDisponivel;
+  try
+    DataModule.FDConnection.ExecSQL(GetSQLFormatado);
+    Result := CodigoLog;
+  except on E: Exception do
+    raise Exception.Create('Não foi Possível Incluir o Log do Download!');
+  end;
+end;
+
+end.

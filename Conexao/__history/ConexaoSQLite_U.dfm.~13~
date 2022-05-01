@@ -1,0 +1,14 @@
+object DataModuleConexao: TDataModuleConexao
+  Height = 197
+  Width = 469
+  object FDConnection: TFDConnection
+    Params.Strings = (
+      
+        'Database=C:\Users\Luana Sarna\OneDrive\'#193'rea de Trabalho\DowloadA' +
+        'rquivoDelphi\BancoDeDados\logDownload.db'
+      'DriverID=SQLite')
+    LoginPrompt = False
+    Left = 88
+    Top = 64
+  end
+end
