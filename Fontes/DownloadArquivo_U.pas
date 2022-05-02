@@ -16,18 +16,21 @@ uses
 
 type
   TFormDownloadArquivo = class(TForm, IObserver)
+    PanelIcones: TPanel;
+    Image1: TImage;
+    Image2: TImage;
+    PanelControles: TPanel;
+    SaveDialog: TSaveDialog;
+    EditURL: TEdit;
+    EditDestinoDownload: TEdit;
+    ProgressBar: TProgressBar;
     BotaoIniciarDownload: TButton;
     BotaoPararDownload: TButton;
     BotaoExibirMensagem: TButton;
-    ProgressBar: TProgressBar;
-    EditURL: TEdit;
     Button1: TButton;
-    LabelURL: TLabel;
-    Image1: TImage;
-    LabelDestinoDownload: TLabel;
-    EditDestinoDownload: TEdit;
     BotaoCaminhoSalvarDownload: TSpeedButton;
-    SaveDialog: TSaveDialog;
+    LabelDestinoDownload: TLabel;
+    LabelURL: TLabel;
     procedure BotaoIniciarDownloadClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure BotaoExibirMensagemClick(Sender: TObject);
@@ -120,7 +123,6 @@ end;
 
 procedure TFormDownloadArquivo.BotaoIniciarDownloadClick(Sender: TObject);
 begin
-  Self.HabilitaControles(False);
   Self.StartDownload;
 end;
 
@@ -162,6 +164,7 @@ begin
   Self.EditURL.Enabled              := Habilita;
   Self.EditDestinoDownload.Enabled  := Habilita;
   Self.BotaoIniciarDownload.Enabled := Habilita;
+  Self.BotaoPararDownload.Enabled   := (not Self.BotaoIniciarDownload.Enabled);
 end;
 
 procedure TFormDownloadArquivo.StartDownload;
@@ -169,6 +172,7 @@ begin
   if not Self.ValidarCampos then
     Exit;
 
+  Self.HabilitaControles(False);
   Self.FThreadDownload.URL             := Self.EditURL.Text;
   Self.FThreadDownload.DestinoDownload := Self.EditDestinoDownload.Text;
   Self.FThreadDownload.Executar;
